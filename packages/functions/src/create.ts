@@ -1,7 +1,7 @@
-import * as uuid from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import { Table } from "sst/node/table";
 import handler from "@daytum/core/handler";
-import dyanmoDb from "@daytum/core/dynamodb";
+import dynamoDb from "@daytum/core/dynamodb";
 
 export const main = handler(async (event) => {
     let data = {
@@ -16,59 +16,15 @@ export const main = handler(async (event) => {
     const params = {
         TableName: Table.Notes.tableName,
         Item: {
-            userId: "123",
-            noteId: uuid.v1(),
+            userId: event.requestContext.authorizer?.iam.cognitoIdentity.identityId,
+            noteId: uuidv4,
             content: data.content,
             attachment: data.attachment,
             createdAt: Date.now(),
         },
     };
 
-    await dyanmoDb.put(params);
+    await dynamoDb.put(params);
 
     return JSON.stringify(params.Item);
 });
-
-// export async function main(event: APIGatewayProxyEvent) {
-//     let data, params;
-
-//     if (event.body) {
-//         data = JSON.parse(event.body);
-//         params = {
-//             TableName: Table.Notes.tableName,
-//             Item: {
-//                 userId: "123",
-//                 noteId: uuid.v1(),
-//                 content: data.content,
-//                 attachment: data.attachment,
-//                 createdAt: Date.now(),
-//             },
-//         };
-//     } else {
-//         return {
-//             statusCode: 404,
-//             body: JSON.stringify({ error: true }),
-//         };
-//     }
-
-//     try {
-//         await dynamoDB.put(params).promise();        
-        
-//         return {
-//             statusCode: 200,
-//             body: JSON.stringify(params.Item),
-//         };    
-//     } catch (error) {
-//         let message;
-//         if (error instanceof Error) {
-//             message = error.message;
-//         } else {
-//             message = String(error);
-//         }
-//         return {
-//             statusCode: 500,
-//             body: JSON.stringify({ error: message }),
-//         };
-//     }
-// }
-

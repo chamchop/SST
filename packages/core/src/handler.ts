@@ -1,10 +1,8 @@
 import { Context, APIGatewayProxyEvent } from "aws-lambda";
-import { json } from "stream/consumers";
 
 export default function handler(lambda: (evt: APIGatewayProxyEvent, context: Context) => Promise<string>) {
     return async function (event: APIGatewayProxyEvent, context: Context) {
         let body, statusCode;
-
         try {
             body = await lambda(event, context);
             statusCode = 200;
@@ -14,7 +12,6 @@ export default function handler(lambda: (evt: APIGatewayProxyEvent, context: Con
                 error: error instanceof Error ? error.message : String(error),
             });
         }
-
         return {
             body,
             statusCode,
